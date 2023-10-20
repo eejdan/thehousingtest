@@ -1,0 +1,73 @@
+
+
+@mixin flex($direction: 'r', $wr: 'nw', $jc: 'fs', $ai: 'fs') {
+    display: flex;
+  
+    @if $direction == 'r' {
+      flex-direction: row;
+    }
+    @else if $direction == 'rr' {
+      flex-direction: row-reverse;
+    }
+    @else if $direction == 'c' {
+      flex-direction: column;
+    }
+    @else if $direction == 'cr' {
+      flex-direction: column-reverse;
+    }
+    @else if $direction == 'init' {
+      flex-direction: initial;
+    }
+    @else if $direction == 'inh' {
+      flex-direction: inherit;
+    }
+    @else {
+      flex-direction: $direction;
+    }
+  
+    @if $wr == 'w' {
+      flex-wrap: wrap;
+    }
+    @else if $wr == 'nw' {
+      flex-wrap: nowrap;
+    }
+    @else if $wr == 'wr' {
+      flex-wrap: wrap-reverse;
+    }
+    @else if $wr == 'init' {
+      flex-wrap: initial;
+    }
+    @else if $wr == 'inh' {
+      flex-wrap: inherit;
+    }
+    @else {
+        flex-wrap: $wr;
+    }
+    
+    @if $jc == 'c' {
+        justify-content: center;
+    }
+    @else if $jc == 'fs' {
+        justify-content: flex-start;
+    }
+    @else if $jc == 'fe' {
+        justify-content: flex-end;
+    }
+    @else {
+        justify-content: $jc;
+    }
+    
+    @if $ai == 'c' {
+      align-items: center;
+    }
+    @else if $ai == 'fs' {
+      align-items: flex-start;
+    }
+    @else if $ai == 'fe' {
+      align-items: flex-end;
+    }
+    @else {
+      align-items: $ai;
+    }
+    
+  }

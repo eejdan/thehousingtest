@@ -1,0 +1,79 @@
+@use 'colors';
+@use 'mixins';
+
+$headerHeight: 70px;
+
+$filtersHeight: 70px;
+
+.layoutContainer {
+  @include mixins.flex(c, nw, fs, fs);
+  width: 100%;
+}
+.headerContainer {
+  @include mixins.flex(r, nw, c, c);
+  width: 100%;
+  height: $headerHeight;
+  font-size: 54px;
+  font-variant-caps: small-caps;
+  color: colors.$primaryColor;
+  background-color: #fff;
+
+  border-bottom: 2px solid colors.$primaryColor;
+  box-shadow: 0px 6px 16px -4px rgba(0,0,0,0.32);
+
+  user-select: none;
+  z-index: 10;
+}
+.appContainer {
+  @include mixins.flex(r, nw, fs, fs);
+  width: 100%;
+}
+.mapContainer {
+  @include mixins.flex(c, nw, fs, c);
+  height: calc(100vh - $headerHeight);
+  width: calc(100vw - 760px);
+  padding: 10px;
+
+  background-color: white;
+}
+.filtersWrapper {
+  @include mixins.flex(r, nw, fs, c);
+  
+  width: 100%;
+  height: $filtersHeight;
+}
+.filterMinMaxMenuContainer {
+  width: 300px;
+}
+.filterMinMaxMenu {
+  @include mixins.flex(r, nw, fs, c);
+  gap: 10px;
+}
+.mapWrapper {
+  width: 100%;
+  height: calc(100% - $filtersHeight - 10px);
+
+}
+.listContainer {
+  width: 750px;
+  @include mixins.flex(c, nw, fs, fs);
+  flex-wrap: wrap;
+}
+
+@media screen and (max-width: 1280px) {
+  .mapContainer {
+    width: calc(100vw - 385px);
+  }
+  .listContainer {
+    width: 375px;
+  }
+}
+
+@media screen and (max-width: 1006px) {
+  .mapContainer {
+    display: none;
+  }
+  .listContainer {
+    width: 100%;
+  }
+}
