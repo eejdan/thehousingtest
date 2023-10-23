@@ -1,187 +1,210 @@
 
-import { useEffect, useState } from "react"
-import { MarkerF } from "@react-google-maps/api"
+import { useRef, useEffect, useState } from "react"
+import { MarkerF, MarkerClusterer } from "@react-google-maps/api"
 import Form from 'react-bootstrap/Form'
 import Dropdown from 'react-bootstrap/Dropdown'
 
-import { Big_Shoulders_Stencil_Display } from 'next/font/google'
+import { Big_Shoulders_Stencil_Display, Open_Sans } from 'next/font/google'
 
-import DefMap from "../components/DefMap"
+
+import ListingsMap from "../components/ListingsMap"
+import HouseListing from "../components/HouseListingCard"
 
 import styles from '../styles/Home.module.scss'
 
+import { getFilteredListings, getMapCenter, getPriceOptions } from "../src/helperFunctions"
 
 const fontBSD = Big_Shoulders_Stencil_Display({
   subsets: ['latin'], weight: ['800']
 });
-
-export const getServerSideProps = (async context => {
-  const res = await fetch('https://qonditive.com/tests/api/listings.json');
-  const data = await res.json();
-
-  var filterData = {};
-  filterData.minPrice = data.result.listings[0].listPrice;
-  filterData.maxPrice = filterData.minPrice;
-  filterData.maxBathrooms = data.result.listings[0].baths.total;
-
-  data.result.listings.forEach(listing => {
-    if (listing.listPrice > filterData.maxPrice)
-      filterData.maxPrice = listing.listPrice;
-    else if (listing.listPrice < filterData.minPrice)
-      filterData.minPrice = listing.listPrice;
-    if (listing.baths.total > filterData.maxBathrooms)
-      filterData.maxBathrooms = listing.baths.total;
-  })
-
-  return { props: { data, filterData } }
+const fontOS = Open_Sans({
+  subsets: ['latin']
 })
 
-const formatPrice = rawPrice => {
-  rawPrice = (rawPrice + '').split('').reverse();
-  for (let i = 3; i < rawPrice.length; i += 4) {
-    rawPrice = [...rawPrice.slice(0, i), ',', ...rawPrice.slice(i)]
-  }
-  rawPrice = rawPrice.reverse().join('');
-  return '$' + rawPrice;
-}
+export const getServerSideProps = (async context => {
+  // const res = await fetch('https://qonditive.com/tests/api/listings.json');
+  // const rawData = await res.json();
+  const rawData = require('C:\\Users\\dani\\ab.json');
+  var initialFilterData = {};
+  initialFilterData.minPrice = parseInt(rawData.result.listings[0].listPrice);
+  initialFilterData.maxPrice = initialFilterData.minPrice;
+  initialFilterData.maxBathrooms = rawData.result.listings[0].baths.total;
+  initialFilterData.maxBeds = rawData.result.listings[0].beds;
 
-export default function Home({ data, filterData }) {
-
-  const [minPrice, setMinPrice] = useState(filterData.minPrice);
-  const [maxPrice, setMaxPrice] = useState(filterData.maxPrice);
-
-  const [priceOptions, setPriceOptions] = useState([]);
-
-  const calibratePriceOptions = () => {
-    let aroundMinPrice = filterData.minPrice;
-    aroundMinPrice = aroundMinPrice + 50000 - aroundMinPrice % 50000;
-    let newPriceOptions = [];
-    newPriceOptions.push({
-      textContent: formatPrice(filterData.minPrice),
-      value: filterData.minPrice
-    })
-    for (let i = 0; aroundMinPrice + i * 50000 < maxPrice; i++) {
-      newPriceOptions.push({
-        textContent: formatPrice(aroundMinPrice + i * 50000),
-        value: aroundMinPrice + i * 50000
-      })
+  rawData.result.listings.forEach(listing => {
+    if (parseInt(listing.listPrice) > initialFilterData.maxPrice)
+      initialFilterData.maxPrice = listing.listPrice;
+    else if (parseInt(listing.listPrice) < initialFilterData.minPrice)
+      initialFilterData.minPrice = listing.listPrice;
+    if (listing.baths.total > initialFilterData.maxBathrooms)
+      initialFilterData.maxBathrooms = listing.baths.total;
+    if(listing.beds > initialFilterData.maxBeds)
+      initialFilterData.maxBeds = listing.beds;
+  })
+  const data = rawData.result.listings.map(listing => {
+    return {
+      id: listing.id,
+      location: {
+        lat: listing.coordinates.latitude,
+        lng: listing.coordinates.longitude,
+        city: (listing.address.city || '').toLowerCase(),
+        zip: (listing.address.zip || '').toLowerCase(),
+        street: (listing.address.street || '').toLowerCase(),
+        county: listing.county,
+        state: (listing.address.state || '').toLowerCase(),
+      }, 
+      images: listing.images.slice(0, 3),
+      price: listing.listPrice,
+      beds: listing.beds,
+      baths: listing.baths.total,
+      surfaceArea: listing.lotSize ? listing.lotSize.sqft : '',
+      agency: listing.listingOffice.name,
     }
-    newPriceOptions.push({
-      textContent: formatPrice(filterData.maxPrice),
-      value: maxPrice
-    })
-    setPriceOptions(newPriceOptions);
-  }
+  })
 
-  const [filteredListings, setFilteredListings] = useState(data.result.listings);
-  const [currentListings, setCurrentListings] = useState(data.result.listings.length)
-  useEffect(() => setCurrentListings(filteredListings.length), [filteredListings])
+  return { props: { data, initialFilterData } }
+})
+
+export default function Home({ data, initialFilterData }) {
+
+  const [textField, setTextField] = useState('');
+  const [sendText, setSendText] = useState('');
+
+  const [minPrice, setMinPrice] = useState(initialFilterData.minPrice);
+  const [maxPrice, setMaxPrice] = useState(initialFilterData.maxPrice);
+  const [minBeds, setMinBeds] = useState(0);
+  const [minBaths, setMinBaths] = useState(0);
+
+  const priceOptions = getPriceOptions(initialFilterData, minPrice, maxPrice);
+
+  const [filteredListings, setFilteredListings] = useState(data);
 
   const [mapCenter, setMapCenter] = useState({
     lat: 40.62392,
     lng: -94.48370,
   })
-  const calibrateCenter = () => {
-    let sumlat = 0, sumlng = 0, count = 0;
-    filteredListings.forEach(listing => {
-      if (!!listing.coordinates) {
-        if (!!listing.coordinates.latitude && !!listing.coordinates.longitude) {
-          sumlat += listing.coordinates.latitude; sumlng += listing.coordinates.longitude;
-          count++;
-        }
-      }
-    })
-    let newCenter = {
-      lat: sumlat / count,
-      lng: sumlng / count
-    }
-    setMapCenter(newCenter);
-  }
   useEffect(() => {
-    calibrateCenter()
-    calibratePriceOptions()
-  }, [])
-  const handleClick = e => {
-
-  }
+    setMapCenter(getMapCenter(filteredListings))
+  }, [filteredListings])
+  useEffect(() => {
+    setFilteredListings(getFilteredListings(initialFilterData, data, minPrice, maxPrice, minBaths, minBeds, sendText))
+  }, [initialFilterData, data, minPrice, maxPrice, minBaths, minBeds, sendText])
+  const timeout = useRef(null);
+  useEffect(() => {
+    clearTimeout(timeout.current);
+    timeout.current = setTimeout(() => { 
+      if(textField.length > 2)
+        setSendText(textField)
+      else if(textField.length < 1)
+        setSendText('');
+    }, 1000)
+  }, [textField])
 
   return (
-    <div className={styles.layoutContainer}>
+    <div className={styles.layoutContainer + ' ' + fontOS.className}>
       <div className={styles.headerContainer + ' ' + fontBSD.className}>
         <div>NotZillow</div>
       </div>
-      <div className={styles.appContainer}>
-        <div className={styles.mapContainer}>
-          <div className={styles.filtersWrapper}>
+      <div className={styles.filtersWrapper}>
             <div>
+              <Form.Text id="textSearchFilterHelpBlock">Your dream house is at..</Form.Text>
               <Form.Control
                 size="md"
                 type="text"
                 id="textSearchFilter"
                 placeholder="City, Address, ZIP..."
+                aria-describedby="textSearchFilterHelpBlock"
+                onChange={e => { setTextField(e.target.value) }}
               />
             </div>
             <div>
-              <Form.Select id="minPriceFilter">
+              <Form.Text id="minPriceFilterHelpBlock">Minimum Price</Form.Text>
+              <Form.Select 
+                id="minPriceFilter"
+                aria-describedby="minPriceFilterHelpBlock"
+                onChange={e => { setMinPrice(e.target.value) }}>
                 {priceOptions.map((option, index) =>
                   <option key={index} value={option.value}>{option.textContent}</option>)}
               </Form.Select>
-              <Form.Text id="maxPriceFilterHelpBlock">Minimum Price</Form.Text>
             </div>
             <div>
-              <Form.Select id="maxPriceFilter" aria-describedby="maxPriceFilterHelpBlock">
-                {priceOptions.map((option, index) =>
+              <Form.Text id="maxPriceFilterHelpBlock">Maximum Price</Form.Text>
+              <Form.Select 
+                id="maxPriceFilter" 
+                aria-describedby="maxPriceFilterHelpBlock"
+                onChange={e => { setMaxPrice(e.target.value) }}>
+                {(JSON.parse(JSON.stringify(priceOptions))).reverse().map((option, index) =>
                   <option key={index} value={option.value}>{option.textContent}</option>)}
               </Form.Select>
-              <Form.Text id="maxPriceFilterHelpBlock">Maximum Price</Form.Text>
 
             </div>
             <div>
-              <Form.Select id="maxPriceFilter" aria-describedby="maxPriceFilterHelpBlock">
-                {[...Array(5).keys()].map((option, index) =>
-                  <option key={index} value={option+1}>{option+"+"}</option>)}
+              <Form.Text id="minBathsFilterHelpBlock">Bathrooms</Form.Text>
+              <Form.Select 
+                id="minBathsFilter" 
+                aria-describedby="minBathsFilterHelpBlock"
+                onChange={e => { setMinBaths(e.target.value) }}>
+                {[...Array(initialFilterData.maxBathrooms).keys()].map((option, index) =>
+                  <option key={index} value={option}>{option+"+"}</option>)}
               </Form.Select>
-              <Form.Text id="maxPriceFilterHelpBlock">Minimum Bathrooms</Form.Text>
             </div>
-          </div>
+            <div>
+              <Form.Text id="minBedsFilterHelpBlock">Beds</Form.Text>
+              <Form.Select 
+                id="minBedsFilter" 
+                aria-describedby="minBedsFilterHelpBlock"
+                onChange={e => { setMinBeds(e.target.value) }}>
+                {[...Array(initialFilterData.maxBeds).keys()].map((option, index) =>
+                  <option key={index} value={option}>{option+"+"}</option>)}
+              </Form.Select>
+            </div>
+      </div>
+      <div className={styles.appContainer}>
+        <div className={styles.mapContainer}>
           <div className={styles.mapWrapper}>
-            <DefMap
+            <ListingsMap
               center={mapCenter}
-            >
-              {filteredListings.map((listing, index) =>
-                <MarkerF
-                  shape={"circle"}
-                  position={{
-                    lat: listing.coordinates.latitude,
-                    lng: listing.coordinates.longitude
-                  }}
-                  key={listing.id}
-                  onClick={() => {
-                    handleClick(index);
-                  }}
-                />)}
-            </DefMap>
+              markers={filteredListings} 
+            >{/* TODO send only locations */}
+              <MarkerClusterer
+                averageCenter
+                maxZoom={16}
+                gridSize={80}
+              >
+                {clusterer => filteredListings.map((listing, index) =>
+                  <MarkerF
+                    shape={"circle"}
+                    position={{
+                      lat: listing.location.lat,
+                      lng: listing.location.lng
+                    }}
+                    key={listing.id}
+                    onClick={() => {
+                      handleClick(index);
+                    }}
+                    clusterer={clusterer}
+                  />)}
+              </MarkerClusterer>
+            </ListingsMap>
           </div>
         </div>
         <div className={styles.listContainer}>
-          <div>
-            Current Listings: {currentListings}
+          <div className={styles.listStatsContainer}>
+            <div className={styles.currentListings}>
+              Current Listings: {filteredListings.length}
+            </div>
           </div>
-          <div>
-            <HouseListing />
-            <HouseListing />
-          </div>
+          <ul className={styles.listWrapper}>
+            {filteredListings.map(listing => 
+            <li key={listing.id}>
+              <HouseListing 
+                listingData={listing}
+              />
+            </li>)}
+          </ul>
         </div>
       </div>
     </div>
   )
 }
 
-function HouseListing() {
-
-  return (
-    <div>
-      HouseListing
-    </div>
-  )
-}

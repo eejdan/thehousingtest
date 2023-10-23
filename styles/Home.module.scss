@@ -1,13 +1,16 @@
-@use 'colors';
-@use 'mixins';
+@use "colors";
+@use "mixins";
 
 $headerHeight: 70px;
 
 $filtersHeight: 70px;
 
+/* TODO clean rules (post map div changes) */
+
 .layoutContainer {
   @include mixins.flex(c, nw, fs, fs);
   width: 100%;
+  text-rendering: optimizeLegibility;
 }
 .headerContainer {
   @include mixins.flex(r, nw, c, c);
@@ -19,18 +22,19 @@ $filtersHeight: 70px;
   background-color: #fff;
 
   border-bottom: 2px solid colors.$primaryColor;
-  box-shadow: 0px 6px 16px -4px rgba(0,0,0,0.32);
+  box-shadow: 0px 6px 16px -4px rgba(0, 0, 0, 0.32);
 
   user-select: none;
   z-index: 10;
 }
+
 .appContainer {
-  @include mixins.flex(r, nw, fs, fs);
+  @include mixins.flex(r, nw, space-between, fs);
   width: 100%;
 }
 .mapContainer {
   @include mixins.flex(c, nw, fs, c);
-  height: calc(100vh - $headerHeight);
+  height: calc(100vh - $headerHeight - $filtersHeight);
   width: calc(100vw - 760px);
   padding: 10px;
 
@@ -38,9 +42,12 @@ $filtersHeight: 70px;
 }
 .filtersWrapper {
   @include mixins.flex(r, nw, fs, c);
-  
-  width: 100%;
+
   height: $filtersHeight;
+  width: 100%;
+  gap: 30px;
+
+  padding: 10px;
 }
 .filterMinMaxMenuContainer {
   width: 300px;
@@ -50,17 +57,40 @@ $filtersHeight: 70px;
   gap: 10px;
 }
 .mapWrapper {
+  margin-top: 5px;
   width: 100%;
-  height: calc(100% - $filtersHeight - 10px);
-
+  height: 100%;
 }
 .listContainer {
   width: 750px;
+  height: calc(100vh - $headerHeight - $filtersHeight);
   @include mixins.flex(c, nw, fs, fs);
-  flex-wrap: wrap;
+  overflow-y: auto;
+}
+.listStatsContainer {
+  height: 35px;
+}
+.listWrapper {
+  height: 100%;
+  width: 100%;
+  margin-bottom: 0;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(286px, 1fr));
+
+  list-style: none;
+  padding: 16px;
+}
+.listWrapper li {
+  display: list-item;
+  min-height: 265px;
+  position: relative;
+  padding: 0;
+
+  
 }
 
-@media screen and (max-width: 1280px) {
+@media screen and (max-width: 1380px) {
   .mapContainer {
     width: calc(100vw - 385px);
   }
@@ -68,12 +98,16 @@ $filtersHeight: 70px;
     width: 375px;
   }
 }
-
 @media screen and (max-width: 1006px) {
   .mapContainer {
     display: none;
   }
   .listContainer {
     width: 100%;
+  }
+}
+@media screen and (max-width: 740px) {
+  .filtersWrapper {
+    gap: 7px;
   }
 }

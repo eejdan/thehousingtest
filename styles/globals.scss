@@ -1,6 +1,8 @@
 @use 'colors';
 
-
+html::-webkit-scrollbar {
+  display: none;
+}
 html,
 body {
   padding: 0;
@@ -17,6 +19,9 @@ a {
 
 * {
   box-sizing: border-box;
+}
+.unselectable {
+  user-select: none;
 }
 
 /* @media (prefers-color-scheme: dark) {

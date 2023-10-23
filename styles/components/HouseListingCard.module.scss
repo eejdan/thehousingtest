@@ -1,0 +1,40 @@
+@use '../mixins';
+
+.card {
+    width: 100%;
+    height: 100%;
+
+    display: grid;
+
+    grid-template-areas: 
+    "imageWrapper"
+    "price"
+    "specs"
+    "address"
+    "agent";
+
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px 0px;
+
+    &:hover {
+        box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 8px 0px;
+    }
+}
+.imageWrapper {
+    grid-area: 'image';
+
+    @include mixins.flex(r, nw, c, c);
+    height: 177px;
+    overflow: hidden;
+}
+.priceContainer {
+    grid-area: 'price';
+}
+.specsContainer {
+    grid-area: 'specs';
+}
+.addressContainer {
+    grid-area: 'address';
+}
+.agentContainer {
+    grid-area: 'agent';
+}
