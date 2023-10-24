@@ -1,5 +1,5 @@
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect, useState, Suspense, lazy } from "react"
 import { MarkerF, MarkerClusterer } from "@react-google-maps/api"
 import Form from 'react-bootstrap/Form'
 import Dropdown from 'react-bootstrap/Dropdown'
@@ -8,7 +8,7 @@ import { Big_Shoulders_Stencil_Display, Open_Sans } from 'next/font/google'
 
 
 import ListingsMap from "../components/ListingsMap"
-import HouseListing from "../components/HouseListingCard"
+const HouseListing = lazy(() => import("../components/HouseListingCard"));
 
 import styles from '../styles/Home.module.scss'
 
@@ -18,7 +18,8 @@ const fontBSD = Big_Shoulders_Stencil_Display({
   subsets: ['latin'], weight: ['800']
 });
 const fontOS = Open_Sans({
-  subsets: ['latin']
+  subsets: ['latin'],
+  weight: ['300', '400', '600', '700']
 })
 
 export const getServerSideProps = (async context => {
@@ -38,12 +39,13 @@ export const getServerSideProps = (async context => {
       initialFilterData.minPrice = listing.listPrice;
     if (listing.baths.total > initialFilterData.maxBathrooms)
       initialFilterData.maxBathrooms = listing.baths.total;
-    if(listing.beds > initialFilterData.maxBeds)
+    if (listing.beds > initialFilterData.maxBeds)
       initialFilterData.maxBeds = listing.beds;
   })
   const data = rawData.result.listings.map(listing => {
     return {
       id: listing.id,
+      status: listing.status,
       location: {
         lat: listing.coordinates.latitude,
         lng: listing.coordinates.longitude,
@@ -52,13 +54,14 @@ export const getServerSideProps = (async context => {
         street: (listing.address.street || '').toLowerCase(),
         county: listing.county,
         state: (listing.address.state || '').toLowerCase(),
-      }, 
+      },
       images: listing.images.slice(0, 3),
       price: listing.listPrice,
       beds: listing.beds,
       baths: listing.baths.total,
-      surfaceArea: listing.lotSize ? listing.lotSize.sqft : '',
+      surfaceArea: listing.lotSize ? listing.lotSize.sqft : 'unknown',
       agency: listing.listingOffice.name,
+      listingDate: listing.listingDate
     }
   })
 
@@ -75,9 +78,11 @@ export default function Home({ data, initialFilterData }) {
   const [minBeds, setMinBeds] = useState(0);
   const [minBaths, setMinBaths] = useState(0);
 
+  const [listSorting, setListSorting] = useState('newest');
+
   const priceOptions = getPriceOptions(initialFilterData, minPrice, maxPrice);
 
-  const [filteredListings, setFilteredListings] = useState(data);
+  const [filteredListings, setFilteredListings] = useState(data);[]
 
   const [mapCenter, setMapCenter] = useState({
     lat: 40.62392,
@@ -92,10 +97,10 @@ export default function Home({ data, initialFilterData }) {
   const timeout = useRef(null);
   useEffect(() => {
     clearTimeout(timeout.current);
-    timeout.current = setTimeout(() => { 
-      if(textField.length > 2)
+    timeout.current = setTimeout(() => {
+      if (textField.length > 2)
         setSendText(textField)
-      else if(textField.length < 1)
+      else if (textField.length < 1)
         setSendText('');
     }, 1000)
   }, [textField])
@@ -106,65 +111,65 @@ export default function Home({ data, initialFilterData }) {
         <div>NotZillow</div>
       </div>
       <div className={styles.filtersWrapper}>
-            <div>
-              <Form.Text id="textSearchFilterHelpBlock">Your dream house is at..</Form.Text>
-              <Form.Control
-                size="md"
-                type="text"
-                id="textSearchFilter"
-                placeholder="City, Address, ZIP..."
-                aria-describedby="textSearchFilterHelpBlock"
-                onChange={e => { setTextField(e.target.value) }}
-              />
-            </div>
-            <div>
-              <Form.Text id="minPriceFilterHelpBlock">Minimum Price</Form.Text>
-              <Form.Select 
-                id="minPriceFilter"
-                aria-describedby="minPriceFilterHelpBlock"
-                onChange={e => { setMinPrice(e.target.value) }}>
-                {priceOptions.map((option, index) =>
-                  <option key={index} value={option.value}>{option.textContent}</option>)}
-              </Form.Select>
-            </div>
-            <div>
-              <Form.Text id="maxPriceFilterHelpBlock">Maximum Price</Form.Text>
-              <Form.Select 
-                id="maxPriceFilter" 
-                aria-describedby="maxPriceFilterHelpBlock"
-                onChange={e => { setMaxPrice(e.target.value) }}>
-                {(JSON.parse(JSON.stringify(priceOptions))).reverse().map((option, index) =>
-                  <option key={index} value={option.value}>{option.textContent}</option>)}
-              </Form.Select>
+        <div>
+          <Form.Text id="textSearchFilterHelpBlock">Your dream house is at..</Form.Text>
+          <Form.Control
+            size="md"
+            type="text"
+            id="textSearchFilter"
+            placeholder="City, Address, ZIP..."
+            aria-describedby="textSearchFilterHelpBlock"
+            onChange={e => { setTextField(e.target.value) }}
+          />
+        </div>
+        <div>
+          <Form.Text id="minPriceFilterHelpBlock">Minimum Price</Form.Text>
+          <Form.Select
+            id="minPriceFilter"
+            aria-describedby="minPriceFilterHelpBlock"
+            onChange={e => { setMinPrice(e.target.value) }}>
+            {priceOptions.map((option, index) =>
+              <option key={index} value={option.value}>{option.textContent}</option>)}
+          </Form.Select>
+        </div>
+        <div>
+          <Form.Text id="maxPriceFilterHelpBlock">Maximum Price</Form.Text>
+          <Form.Select
+            id="maxPriceFilter"
+            aria-describedby="maxPriceFilterHelpBlock"
+            onChange={e => { setMaxPrice(e.target.value) }}>
+            {(JSON.parse(JSON.stringify(priceOptions))).reverse().map((option, index) =>
+              <option key={index} value={option.value}>{option.textContent}</option>)}
+          </Form.Select>
 
-            </div>
-            <div>
-              <Form.Text id="minBathsFilterHelpBlock">Bathrooms</Form.Text>
-              <Form.Select 
-                id="minBathsFilter" 
-                aria-describedby="minBathsFilterHelpBlock"
-                onChange={e => { setMinBaths(e.target.value) }}>
-                {[...Array(initialFilterData.maxBathrooms).keys()].map((option, index) =>
-                  <option key={index} value={option}>{option+"+"}</option>)}
-              </Form.Select>
-            </div>
-            <div>
-              <Form.Text id="minBedsFilterHelpBlock">Beds</Form.Text>
-              <Form.Select 
-                id="minBedsFilter" 
-                aria-describedby="minBedsFilterHelpBlock"
-                onChange={e => { setMinBeds(e.target.value) }}>
-                {[...Array(initialFilterData.maxBeds).keys()].map((option, index) =>
-                  <option key={index} value={option}>{option+"+"}</option>)}
-              </Form.Select>
-            </div>
+        </div>
+        <div>
+          <Form.Text id="minBathsFilterHelpBlock">Bathrooms</Form.Text>
+          <Form.Select
+            id="minBathsFilter"
+            aria-describedby="minBathsFilterHelpBlock"
+            onChange={e => { setMinBaths(e.target.value) }}>
+            {[...Array(initialFilterData.maxBathrooms).keys()].map((option, index) =>
+              <option key={index} value={option}>{option + "+"}</option>)}
+          </Form.Select>
+        </div>
+        <div>
+          <Form.Text id="minBedsFilterHelpBlock">Beds</Form.Text>
+          <Form.Select
+            id="minBedsFilter"
+            aria-describedby="minBedsFilterHelpBlock"
+            onChange={e => { setMinBeds(e.target.value) }}>
+            {[...Array(initialFilterData.maxBeds).keys()].map((option, index) =>
+              <option key={index} value={option}>{option + "+"}</option>)}
+          </Form.Select>
+        </div>
       </div>
       <div className={styles.appContainer}>
         <div className={styles.mapContainer}>
           <div className={styles.mapWrapper}>
             <ListingsMap
               center={mapCenter}
-              markers={filteredListings} 
+              markers={filteredListings}
             >{/* TODO send only locations */}
               <MarkerClusterer
                 averageCenter
@@ -189,18 +194,35 @@ export default function Home({ data, initialFilterData }) {
           </div>
         </div>
         <div className={styles.listContainer}>
-          <div className={styles.listStatsContainer}>
-            <div className={styles.currentListings}>
-              Current Listings: {filteredListings.length}
+          <div className={styles.listHeader}>
+            <div className={styles.resultCount}>
+              {filteredListings.length} results
+            </div>
+            <div className={styles.sortControl}>
+              <Dropdown align="end" onSelect={(eventKey, e) => { setListSorting(eventKey) }}>
+                <Dropdown.Toggle variant="Primary">Sort: {listSorting}</Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item eventKey="newest">
+                    Sort by Newest
+                  </Dropdown.Item>
+                  <Dropdown.Item eventKey="oldest">
+                    Sort by Oldest
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
             </div>
           </div>
           <ul className={styles.listWrapper}>
-            {filteredListings.map(listing => 
-            <li key={listing.id}>
-              <HouseListing 
-                listingData={listing}
-              />
-            </li>)}
+            {
+              filteredListings.map((listing, index) => {
+                  return <li key={listing.id}>
+                  <Suspense>
+                    <HouseListing
+                      listingData={listing}
+                    />
+                  </Suspense>
+                </li>
+              })}
           </ul>
         </div>
       </div>

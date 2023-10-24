@@ -7,36 +7,97 @@
     overflow: hidden;
 
     display: grid;
-
+    gap: 0px;
     grid-template-areas: 
-    "imageWrapper"
+    "image"
     "price"
     "specs"
     "address"
     "agent";
 
+    font-size: 14px;
+    line-height: 1;
+
     box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px 0px;
+    border-radius: 7px;
 
     &:hover {
         box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 8px 0px;
     }
+    & > div:not(.imageWrapper) {
+        padding-left: 8px;
+    }
+}
+.statusRibbon {
+    position: absolute;
+
+    left: 8px;
+    top: 8px;
+    padding: 4px 12px;
+    
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+
+    border-radius: 100px;
+    background-color: rgba(0, 0, 0, 0.6);
+
 }
 .imageWrapper {
-    grid-area: 'image';
+    grid-area: image;
 
     @include mixins.flex(r, nw, c, c);
     height: 177px;
     overflow: hidden;
+    padding-left: 0 !important;
 }
 .priceContainer {
-    grid-area: 'price';
+    grid-area: price;
+    font-weight: bold;
+    font-size: 20px;
 }
 .specsContainer {
-    grid-area: 'specs';
+    grid-area: specs;
+}
+.specsWrapper {
+    @include mixins.flex(r, w, fs, fs);
+    
+    margin: 0px;
+    padding: 0px;
+    & > div::after {
+        content: ' | '
+    }
+    & > div:last-child::after {
+        content: ''
+    }
 }
 .addressContainer {
-    grid-area: 'address';
+    grid-area: address;
+    text-transform: capitalize;
+
+    overflow: shown;
+    
+    @include mixins.flex(r, w, fs, fs);
+    & > div {
+        padding-right: 3px;
+    }
+
+    & > div::after {
+        content: ', '
+    }
+    & > div:last-child::after {
+        content: ''
+    }
 }
 .agentContainer {
-    grid-area: 'agent';
+    grid-area: agent;
+
+    text-transform: uppercase;
+    font-size: 11px;
+    line-height: 16px;
+
+    -webkit-font-smoothing: antialiased;
+    font-smooth: antialiased;
+
+    font-weight: 300;
 }

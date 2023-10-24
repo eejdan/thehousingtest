@@ -1,5 +1,8 @@
 @use 'colors';
 
+* {
+  box-sizing: border-box;
+}
 html::-webkit-scrollbar {
   display: none;
 }
@@ -17,12 +20,15 @@ a {
   text-decoration: none;
 }
 
-* {
-  box-sizing: border-box;
+strong {
+  font-weight: 600 !important;
 }
+
 .unselectable {
   user-select: none;
 }
+
+
 
 /* @media (prefers-color-scheme: dark) {
   html {

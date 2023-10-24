@@ -69,5 +69,15 @@ export const getFilteredListings = (initialFilterData, listings, minPrice, maxPr
     if(found === true)
       newList.push(listing);
   })
+  
   return newList;
+}
+
+export const displayIfNotEmpty = (field, opts) => {
+  if(field != '')
+    return <div>field</div>
+  return '';
+}
+export const wrapIn = (field) => {
+
 }
