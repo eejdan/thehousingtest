@@ -1,6 +1,6 @@
 
 import { useRef, useEffect, useState, Suspense, lazy } from "react"
-import { MarkerF, MarkerClusterer } from "@react-google-maps/api"
+import { MarkerF, MarkerClustererF } from "@react-google-maps/api"
 import Form from 'react-bootstrap/Form'
 import Dropdown from 'react-bootstrap/Dropdown'
 
@@ -23,9 +23,9 @@ const fontOS = Open_Sans({
 })
 
 export const getServerSideProps = (async context => {
-  // const res = await fetch('https://qonditive.com/tests/api/listings.json');
-  // const rawData = await res.json();
-  const rawData = require('C:\\Users\\dani\\ab.json');
+  const res = await fetch('https://qonditive.com/tests/api/listings.json');
+  const rawData = await res.json();
+  // const rawData = require('C:\\Users\\dani\\ab.json');
   var initialFilterData = {};
   initialFilterData.minPrice = parseInt(rawData.result.listings[0].listPrice);
   initialFilterData.maxPrice = initialFilterData.minPrice;
@@ -82,14 +82,16 @@ export default function Home({ data, initialFilterData }) {
 
   const priceOptions = getPriceOptions(initialFilterData, minPrice, maxPrice);
 
-  const [filteredListings, setFilteredListings] = useState(data);[]
+  const [filteredListings, setFilteredListings] = useState(data);
 
+  const [ready, setReady] = useState(false);
   const [mapCenter, setMapCenter] = useState({
     lat: 40.62392,
     lng: -94.48370,
   })
   useEffect(() => {
-    setMapCenter(getMapCenter(filteredListings))
+    setMapCenter(getMapCenter(filteredListings));
+    setReady(true);
   }, [filteredListings])
   useEffect(() => {
     setFilteredListings(getFilteredListings(initialFilterData, data, minPrice, maxPrice, minBaths, minBeds, sendText))
@@ -170,15 +172,15 @@ export default function Home({ data, initialFilterData }) {
             <ListingsMap
               center={mapCenter}
               markers={filteredListings}
+              ready={ready}
             >{/* TODO send only locations */}
-              <MarkerClusterer
+              <MarkerClustererF
                 averageCenter
                 maxZoom={16}
                 gridSize={80}
               >
                 {clusterer => filteredListings.map((listing, index) =>
                   <MarkerF
-                    shape={"circle"}
                     position={{
                       lat: listing.location.lat,
                       lng: listing.location.lng
@@ -189,7 +191,7 @@ export default function Home({ data, initialFilterData }) {
                     }}
                     clusterer={clusterer}
                   />)}
-              </MarkerClusterer>
+              </MarkerClustererF>
             </ListingsMap>
           </div>
         </div>
@@ -215,14 +217,13 @@ export default function Home({ data, initialFilterData }) {
           <ul className={styles.listWrapper}>
             {
               filteredListings.map((listing, index) => {
-                  return <li key={listing.id}>
-                  <Suspense>
+                return <li key={listing.id}>
                     <HouseListing
                       listingData={listing}
                     />
-                  </Suspense>
                 </li>
               })}
+
           </ul>
         </div>
       </div>

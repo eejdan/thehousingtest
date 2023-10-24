@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, memo } from 'react'
+import React, { useState, useCallback, memo } from 'react'
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 
 const containerStyle = {
@@ -14,15 +14,13 @@ function ListingsMap(props) {
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLEMAPS_API_KEY,
   })
   const [map, setMap] = useState(null)
-  // useEffect(() => map.setCenter(props.center), [props.center, map]);
   const onUnmount = useCallback(function callback(map) {
     setMap(null)
   }, [])
-  return isLoaded ? (
+  return isLoaded && props.ready ? (
     <GoogleMap
       mapContainerStyle={containerStyle}
-      style={{ '&;hover': { boxShadow: '0 0 0 0.25rem rgba(13,110,253,.25)'}}}
-      center={props.center}
+      defaultCenter={props.center}
       zoom={4.5}
       onLoad={(map) => {
         const bounds = new window.google.maps.LatLngBounds();
@@ -31,7 +29,6 @@ function ListingsMap(props) {
             bounds.extend({ lat: marker.location.lat, lng: marker.location.lng });
         })
         map.fitBounds(bounds);
-        console.log(map);
         setMap(map);
       }}
       
@@ -42,4 +39,4 @@ function ListingsMap(props) {
   ) : <></>
 }
 
-export default memo(ListingsMap)
+export default React.memo(ListingsMap)
