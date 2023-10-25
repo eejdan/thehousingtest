@@ -5,7 +5,7 @@ import styles from '../styles/components/HouseListingCard.module.scss'
 import { formatPrice } from '../src/helperFunctions'
 // TODO check responsiveness
 // TODO make mobile ready
-export default function HouseListing(props) {
+export default function HouseListingCard(props) {
   
   return (
     <div className={styles.card}>
@@ -35,8 +35,8 @@ export default function HouseListing(props) {
       </div>
       <div className={styles.addressContainer}>
        {
-        [props.listingData.location.street, props.listingData.location.city, props.listingData.location.state, props.listingData.location.zip].map((field, index) => {
-          if(field != '')
+        [props.listingData.location.street, props.listingData.location.city, (props.listingData.location.state+'').toUpperCase() + ' ' + props.listingData.location.zip].map((field, index) => {
+          if(field != '' && field != ' ')
             return <div key={index}>{field}</div>
           return ''; 
         })

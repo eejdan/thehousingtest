@@ -17,7 +17,7 @@ function ListingsMap(props) {
   const onUnmount = useCallback(function callback(map) {
     setMap(null)
   }, [])
-  return isLoaded && props.ready ? (
+  return isLoaded ? (
     <GoogleMap
       mapContainerStyle={containerStyle}
       defaultCenter={props.center}

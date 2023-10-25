@@ -43,7 +43,7 @@ export const formatPrice = rawPrice => {
   rawPrice = rawPrice.reverse().join('');
   return '$' + rawPrice;
 }
-export const getFilteredListings = (initialFilterData, listings, minPrice, maxPrice, minBaths, minBeds, textFilter) => {
+export const getFilteredListings = (initialFilterData, listings, minPrice, maxPrice, minBaths, minBeds, textFilter, listSorting) => {
   if(textFilter)
     var keywords = (textFilter+'').toLowerCase().split(' ');
   let newList = [];
@@ -69,15 +69,9 @@ export const getFilteredListings = (initialFilterData, listings, minPrice, maxPr
     if(found === true)
       newList.push(listing);
   })
-  
+  newList.sort((a,b) => {
+    return listSorting != 'oldest' ? (a.listingDate < b.listingDate ? 1 : -1)
+      : (a.listingDate > b.listingDate ? 1 : -1)
+  })
   return newList;
-}
-
-export const displayIfNotEmpty = (field, opts) => {
-  if(field != '')
-    return <div>field</div>
-  return '';
-}
-export const wrapIn = (field) => {
-
 }

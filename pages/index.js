@@ -8,7 +8,7 @@ import { Big_Shoulders_Stencil_Display, Open_Sans } from 'next/font/google'
 
 
 import ListingsMap from "../components/ListingsMap"
-const HouseListing = lazy(() => import("../components/HouseListingCard"));
+import HouseListingCard from '../components/HouseListingCard'
 
 import styles from '../styles/Home.module.scss'
 
@@ -84,18 +84,18 @@ export default function Home({ data, initialFilterData }) {
 
   const [filteredListings, setFilteredListings] = useState(data);
 
-  const [ready, setReady] = useState(false);
   const [mapCenter, setMapCenter] = useState({
     lat: 40.62392,
     lng: -94.48370,
   })
   useEffect(() => {
     setMapCenter(getMapCenter(filteredListings));
-    setReady(true);
   }, [filteredListings])
+
   useEffect(() => {
-    setFilteredListings(getFilteredListings(initialFilterData, data, minPrice, maxPrice, minBaths, minBeds, sendText))
-  }, [initialFilterData, data, minPrice, maxPrice, minBaths, minBeds, sendText])
+    setFilteredListings(getFilteredListings(initialFilterData, data, minPrice, maxPrice, minBaths, minBeds, sendText, listSorting))
+  }, [initialFilterData, data, minPrice, maxPrice, minBaths, minBeds, sendText, listSorting])
+
   const timeout = useRef(null);
   useEffect(() => {
     clearTimeout(timeout.current);
@@ -106,6 +106,8 @@ export default function Home({ data, initialFilterData }) {
         setSendText('');
     }, 1000)
   }, [textField])
+
+  useEffect 
 
   return (
     <div className={styles.layoutContainer + ' ' + fontOS.className}>
@@ -172,7 +174,6 @@ export default function Home({ data, initialFilterData }) {
             <ListingsMap
               center={mapCenter}
               markers={filteredListings}
-              ready={ready}
             >{/* TODO send only locations */}
               <MarkerClustererF
                 averageCenter
@@ -218,7 +219,7 @@ export default function Home({ data, initialFilterData }) {
             {
               filteredListings.map((listing, index) => {
                 return <li key={listing.id}>
-                    <HouseListing
+                    <HouseListingCard
                       listingData={listing}
                     />
                 </li>

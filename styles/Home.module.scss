@@ -48,6 +48,12 @@ $filtersHeight: 80px;
   gap: 30px;
 
   padding: 10px;
+
+  border-bottom: 1px solid colors.$primaryHighlight;
+  box-shadow: 0px 7px 15px -3px rgba($color: colors.$primaryHighlight, $alpha: 0.38);
+
+  z-index: 99;
+
 }
 .filterMinMaxMenuContainer {
   width: 300px;
@@ -78,6 +84,8 @@ $filtersHeight: 80px;
 }
 
 .listWrapper {
+  position: relative;
+
   height: 100%;
   width: 100%;
   margin-bottom: 0;
@@ -87,15 +95,18 @@ $filtersHeight: 80px;
 
   list-style: none;
   padding: 16px;
-}
-.listWrapper li {
-  display: list-item;
-  height: 281px;
-  position: relative;
-  padding: 0;
 
-  
+  & > li {
+    display: list-item;
+    height: 281px;
+    position: relative;
+    padding: 0;
+  }
+  & > li:last-child {
+    margin-bottom: 10px;
+  }
 }
+
 
 @media screen and (max-width: 1380px) {
   .mapContainer {
@@ -115,6 +126,10 @@ $filtersHeight: 80px;
 }
 @media screen and (max-width: 740px) {
   .filtersWrapper {
+    height: auto;
+
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 7px;
   }
 }

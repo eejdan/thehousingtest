@@ -27,6 +27,7 @@
     & > div:not(.imageWrapper) {
         padding-left: 8px;
     }
+    z-index: 1000;
 }
 .statusRibbon {
     position: absolute;
