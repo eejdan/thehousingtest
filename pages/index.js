@@ -24,9 +24,8 @@ const fontOS = Open_Sans({
 })
 
 export const getServerSideProps = (async context => {
-  // const res = await fetch('https://qonditive.com/tests/api/listings.json');
-  // const rawData = await res.json();
-  const rawData = require('C:\\Users\\dani\\ab.json');
+  const res = await fetch('https://qonditive.com/tests/api/listings.json');
+  const rawData = await res.json();
   var initialFilterData = {};
   initialFilterData.minPrice = parseInt(rawData.result.listings[0].listPrice);
   initialFilterData.maxPrice = initialFilterData.minPrice;
