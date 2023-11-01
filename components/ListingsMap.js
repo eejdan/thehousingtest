@@ -25,13 +25,13 @@ function ListingsMap(props) {
       onLoad={(map) => {
         const bounds = new window.google.maps.LatLngBounds();
         props.markers.forEach((marker) => {
-          if(marker.location.lat && marker.location.lng)
+          if (marker.location.lat && marker.location.lng)
             bounds.extend({ lat: marker.location.lat, lng: marker.location.lng });
         })
         map.fitBounds(bounds);
         setMap(map);
       }}
-      
+
       onUnmount={onUnmount}
     >
       {props.children}

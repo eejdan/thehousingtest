@@ -1,5 +1,5 @@
 
-import { useRef, useEffect, useState, Suspense, lazy } from "react"
+import { useRef, useEffect, useState } from "react"
 import { MarkerF, MarkerClustererF } from "@react-google-maps/api"
 import Form from 'react-bootstrap/Form'
 import Dropdown from 'react-bootstrap/Dropdown'
@@ -9,10 +9,11 @@ import { Big_Shoulders_Stencil_Display, Open_Sans } from 'next/font/google'
 
 import ListingsMap from "../components/ListingsMap"
 import HouseListingCard from '../components/HouseListingCard'
+import HouseListingModal from "../components/HouseListingModal"
 
 import styles from '../styles/Home.module.scss'
 
-import { getFilteredListings, getMapCenter, getPriceOptions } from "../src/helperFunctions"
+import { getFilteredListings, getMapCenter, getPriceOptions, formatCount } from "../src/helperFunctions"
 
 const fontBSD = Big_Shoulders_Stencil_Display({
   subsets: ['latin'], weight: ['800']
@@ -23,9 +24,9 @@ const fontOS = Open_Sans({
 })
 
 export const getServerSideProps = (async context => {
-  const res = await fetch('https://qonditive.com/tests/api/listings.json');
-  const rawData = await res.json();
-  // const rawData = require('C:\\Users\\dani\\ab.json');
+  // const res = await fetch('https://qonditive.com/tests/api/listings.json');
+  // const rawData = await res.json();
+  const rawData = require('C:\\Users\\dani\\ab.json');
   var initialFilterData = {};
   initialFilterData.minPrice = parseInt(rawData.result.listings[0].listPrice);
   initialFilterData.maxPrice = initialFilterData.minPrice;
@@ -55,7 +56,7 @@ export const getServerSideProps = (async context => {
         county: listing.county,
         state: (listing.address.state || '').toLowerCase(),
       },
-      images: listing.images.slice(0, 3),
+      images: listing.images.slice(0, 5).map(imageLink => imageLink.slice(40)),
       price: listing.listPrice,
       beds: listing.beds,
       baths: listing.baths.total,
@@ -64,11 +65,14 @@ export const getServerSideProps = (async context => {
       listingDate: listing.listingDate
     }
   })
-
+  console.log(initialFilterData);
   return { props: { data, initialFilterData } }
 })
 
 export default function Home({ data, initialFilterData }) {
+
+  const [selectedListing, setSelectedListing] = useState(data[0]);
+  const [showModal, setShowModal] = useState(false);
 
   const [textField, setTextField] = useState('');
   const [sendText, setSendText] = useState('');
@@ -81,8 +85,8 @@ export default function Home({ data, initialFilterData }) {
   const [listSorting, setListSorting] = useState('newest');
 
   const priceOptions = getPriceOptions(initialFilterData, minPrice, maxPrice);
-
   const [filteredListings, setFilteredListings] = useState(data);
+
 
   const [mapCenter, setMapCenter] = useState({
     lat: 40.62392,
@@ -107,12 +111,15 @@ export default function Home({ data, initialFilterData }) {
     }, 1000)
   }, [textField])
 
-  useEffect 
+  useEffect
 
   return (
     <div className={styles.layoutContainer + ' ' + fontOS.className}>
+      {showModal ? <HouseListingModal onClose={() => {
+        setShowModal(false);
+      }} listingData={selectedListing} /> : ''}
       <div className={styles.headerContainer + ' ' + fontBSD.className}>
-        <div>NotZillow</div>
+        <div>!Zillow</div>
       </div>
       <div className={styles.filtersWrapper}>
         <div>
@@ -148,22 +155,22 @@ export default function Home({ data, initialFilterData }) {
 
         </div>
         <div>
-          <Form.Text id="minBathsFilterHelpBlock">Bathrooms</Form.Text>
-          <Form.Select
-            id="minBathsFilter"
-            aria-describedby="minBathsFilterHelpBlock"
-            onChange={e => { setMinBaths(e.target.value) }}>
-            {[...Array(initialFilterData.maxBathrooms).keys()].map((option, index) =>
-              <option key={index} value={option}>{option + "+"}</option>)}
-          </Form.Select>
-        </div>
-        <div>
           <Form.Text id="minBedsFilterHelpBlock">Beds</Form.Text>
           <Form.Select
             id="minBedsFilter"
             aria-describedby="minBedsFilterHelpBlock"
             onChange={e => { setMinBeds(e.target.value) }}>
-            {[...Array(initialFilterData.maxBeds).keys()].map((option, index) =>
+            {[...Array(initialFilterData.maxBeds + 1).keys()].map((option, index) =>
+              <option key={index} value={option}>{option + "+"}</option>)}
+          </Form.Select>
+        </div>
+        <div>
+          <Form.Text id="minBathsFilterHelpBlock">Bathrooms</Form.Text>
+          <Form.Select
+            id="minBathsFilter"
+            aria-describedby="minBathsFilterHelpBlock"
+            onChange={e => { setMinBaths(e.target.value) }}>
+            {[...Array(initialFilterData.maxBathrooms + 1).keys()].map((option, index) =>
               <option key={index} value={option}>{option + "+"}</option>)}
           </Form.Select>
         </div>
@@ -174,7 +181,7 @@ export default function Home({ data, initialFilterData }) {
             <ListingsMap
               center={mapCenter}
               markers={filteredListings}
-            >{/* TODO send only locations */}
+            >
               <MarkerClustererF
                 averageCenter
                 maxZoom={16}
@@ -199,7 +206,7 @@ export default function Home({ data, initialFilterData }) {
         <div className={styles.listContainer}>
           <div className={styles.listHeader}>
             <div className={styles.resultCount}>
-              {filteredListings.length} results
+              {formatCount(filteredListings.length)} results
             </div>
             <div className={styles.sortControl}>
               <Dropdown align="end" onSelect={(eventKey, e) => { setListSorting(eventKey) }}>
@@ -218,10 +225,15 @@ export default function Home({ data, initialFilterData }) {
           <ul className={styles.listWrapper}>
             {
               filteredListings.map((listing, index) => {
-                return <li key={listing.id}>
-                    <HouseListingCard
-                      listingData={listing}
-                    />
+                return <li key={listing.id} onClick={
+                  () => {
+                    setSelectedListing(filteredListings[index]);
+                    setShowModal(true);
+                  }
+                }>
+                  <HouseListingCard
+                    listingData={listing}
+                  />
                 </li>
               })}
 

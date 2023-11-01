@@ -43,33 +43,41 @@ export const formatPrice = rawPrice => {
   rawPrice = rawPrice.reverse().join('');
   return '$' + rawPrice;
 }
+export const formatCount = (raw, sep) => {
+  raw = (raw + '').split('').reverse();
+  for (let i = 3; i < raw.length; i += 4) {
+    raw = [...raw.slice(0, i), sep, ...raw.slice(i)]
+  }
+  raw = raw.reverse().join('');
+  return raw;
+}
 export const getFilteredListings = (initialFilterData, listings, minPrice, maxPrice, minBaths, minBeds, textFilter, listSorting) => {
-  if(textFilter)
-    var keywords = (textFilter+'').toLowerCase().split(' ');
+  if (textFilter)
+    var keywords = (textFilter + '').toLowerCase().split(' ');
   let newList = [];
   listings.forEach(listing => {
-    if(initialFilterData.minPrice != minPrice)
-      if(listing.price < minPrice)
+    if (initialFilterData.minPrice != minPrice)
+      if (listing.price < minPrice)
         return;
-    if(initialFilterData.maxPrice != maxPrice)
-      if(listing.price > maxPrice)
+    if (initialFilterData.maxPrice != maxPrice)
+      if (listing.price > maxPrice)
         return;
-    if(listing.baths < minBaths)
+    if (listing.baths < minBaths)
       return;
-    if(listing.beds < minBeds)
+    if (listing.beds < minBeds)
       return;
-    if(!keywords)
+    if (!keywords)
       return newList.push(listing);
 
     let found = false;
     keywords.forEach(word => {
-      if(listing.location.city.search(word) > -1 || listing.location.zip.search(word) > -1 || listing.location.street.search(word) > -1)
+      if (listing.location.city.search(word) > -1 || listing.location.zip.search(word) > -1 || listing.location.street.search(word) > -1)
         found = true;
     })
-    if(found === true)
+    if (found === true)
       newList.push(listing);
   })
-  newList.sort((a,b) => {
+  newList.sort((a, b) => {
     return listSorting != 'oldest' ? (a.listingDate < b.listingDate ? 1 : -1)
       : (a.listingDate > b.listingDate ? 1 : -1)
   })

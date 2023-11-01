@@ -6,14 +6,14 @@ import { formatPrice } from '../src/helperFunctions'
 // TODO check responsiveness
 // TODO make mobile ready
 export default function HouseListingCard(props) {
-  
+
   return (
     <div className={styles.card}>
       <div className={styles.statusRibbon}>
         {props.listingData.status}
       </div>
-      <div className={styles.imageWrapper}> 
-        <Image src={props.listingData.images[0]} alt=''
+      <div className={styles.imageWrapper}>
+        <Image src={"https://listing-images.homejunction.com/" + props.listingData.images[0]} alt=''
           sizes="100vw"
           style={{
             width: '100%',
@@ -24,7 +24,7 @@ export default function HouseListingCard(props) {
           loading='lazy' />
       </div>
       <div className={styles.priceContainer}>
-      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD',   maximumFractionDigits: 0}).format(parseInt(props.listingData.price))}
+        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(parseInt(props.listingData.price))}
       </div>
       <div className={styles.specsContainer}>
         <div className={styles.specsWrapper}>
@@ -34,13 +34,13 @@ export default function HouseListingCard(props) {
         </div>
       </div>
       <div className={styles.addressContainer}>
-       {
-        [props.listingData.location.street, props.listingData.location.city, (props.listingData.location.state+'').toUpperCase() + ' ' + props.listingData.location.zip].map((field, index) => {
-          if(field != '' && field != ' ')
-            return <div key={index}>{field}</div>
-          return ''; 
-        })
-      }
+        {
+          [props.listingData.location.street, props.listingData.location.city, (props.listingData.location.state + '').toUpperCase() + ' ' + props.listingData.location.zip].map((field, index) => {
+            if (field != '' && field != ' ')
+              return <div key={index}>{field}</div>
+            return '';
+          })
+        }
       </div>
       <div className={styles.agentContainer}>{props.listingData.agency}</div>
     </div>

@@ -1,0 +1,12 @@
+@use "../../styles/mixins";
+
+.container {
+    position: fixed;
+
+    width: 100vw;
+    height: 100vh;
+
+    @include mixins.flex(r, nw, c, fs);
+    background-color: rgba(#000, 0.4);
+    z-index: 99999;
+}

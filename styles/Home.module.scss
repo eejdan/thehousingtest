@@ -53,14 +53,6 @@ $filtersHeight: 80px;
   box-shadow: 0px 7px 15px -3px rgba($color: colors.$primaryHighlight, $alpha: 0.38);
 
   z-index: 99;
-
-}
-.filterMinMaxMenuContainer {
-  width: 300px;
-}
-.filterMinMaxMenu {
-  @include mixins.flex(r, nw, fs, c);
-  gap: 10px;
 }
 .mapWrapper {
   margin-top: 5px;
@@ -82,7 +74,16 @@ $filtersHeight: 80px;
   padding: 5px;
   padding-right: 4px;
 }
+.resultCount {
+  font-weight: 600;
+}
+.sortControl {
+  color: colors.$primaryColor;
 
+  &:hover {
+    color: colors.$primaryHighlight;
+  }
+}
 .listWrapper {
   position: relative;
 
@@ -94,7 +95,7 @@ $filtersHeight: 80px;
   grid-template-columns: repeat(auto-fill, minmax(286px, 1fr));
 
   list-style: none;
-  padding: 16px;
+  padding: 8px 16px;
 
   & > li {
     display: list-item;
