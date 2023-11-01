@@ -6,10 +6,9 @@ import Dropdown from 'react-bootstrap/Dropdown'
 
 import { Big_Shoulders_Stencil_Display, Open_Sans } from 'next/font/google'
 
-
-import ListingsMap from "../components/ListingsMap"
-import HouseListingCard from '../components/HouseListingCard'
 import HouseListingModal from "../components/HouseListingModal"
+import HouseListingCard from '../components/HouseListingCard'
+import ListingsMap from "../components/ListingsMap"
 
 import styles from '../styles/Home.module.scss'
 
@@ -27,6 +26,7 @@ export const getServerSideProps = (async context => {
   const res = await fetch('https://qonditive.com/tests/api/listings.json');
   const rawData = await res.json();
   var initialFilterData = {};
+
   initialFilterData.minPrice = parseInt(rawData.result.listings[0].listPrice);
   initialFilterData.maxPrice = initialFilterData.minPrice;
   initialFilterData.maxBathrooms = rawData.result.listings[0].baths.total;
@@ -37,35 +37,40 @@ export const getServerSideProps = (async context => {
       initialFilterData.maxPrice = listing.listPrice;
     else if (parseInt(listing.listPrice) < initialFilterData.minPrice)
       initialFilterData.minPrice = listing.listPrice;
+
     if (listing.baths.total > initialFilterData.maxBathrooms)
       initialFilterData.maxBathrooms = listing.baths.total;
+
     if (listing.beds > initialFilterData.maxBeds)
       initialFilterData.maxBeds = listing.beds;
   })
-  const data = rawData.result.listings.map(listing => {
-    return {
-      id: listing.id,
-      status: listing.status,
-      location: {
-        lat: listing.coordinates.latitude,
-        lng: listing.coordinates.longitude,
-        city: (listing.address.city || '').toLowerCase(),
-        zip: (listing.address.zip || '').toLowerCase(),
-        street: (listing.address.street || '').toLowerCase(),
-        county: listing.county,
-        state: (listing.address.state || '').toLowerCase(),
-      },
-      images: listing.images.slice(0, 5).map(imageLink => imageLink.slice(40)),
-      price: listing.listPrice,
-      beds: listing.beds,
-      baths: listing.baths.total,
-      surfaceArea: listing.lotSize ? listing.lotSize.sqft : 'unknown',
-      agency: listing.listingOffice.name,
-      listingDate: listing.listingDate
+  return {
+    props: {
+      initialFilterData,
+      data: rawData.result.listings.map(listing => {
+        return {
+          id: listing.id,
+          status: listing.status,
+          location: {
+            lat: listing.coordinates.latitude,
+            lng: listing.coordinates.longitude,
+            city: (listing.address.city || '').toLowerCase(),
+            zip: (listing.address.zip || '').toLowerCase(),
+            street: (listing.address.street || '').toLowerCase(),
+            county: listing.county,
+            state: (listing.address.state || '').toLowerCase(),
+          },
+          images: listing.images.slice(0, 5).map(imageLink => imageLink.slice(40)), // Pentru a nu depasi 128kb response (warning de la nodejs)
+          price: listing.listPrice,
+          beds: listing.beds,
+          baths: listing.baths.total,
+          surfaceArea: listing.lotSize ? listing.lotSize.sqft : '',
+          agency: listing.listingOffice.name,
+          listingDate: listing.listingDate
+        }
+      })
     }
-  })
-  console.log(initialFilterData);
-  return { props: { data, initialFilterData } }
+  }
 })
 
 export default function Home({ data, initialFilterData }) {
@@ -93,8 +98,8 @@ export default function Home({ data, initialFilterData }) {
   })
   useEffect(() => {
     setMapCenter(getMapCenter(filteredListings));
-  }, [filteredListings])
-
+  }, [filteredListings]) 
+  // seteaza centrul hartii in centrul zonei anunturilor - dar numai la prima montare a hartii (numai pe lista tuturor anunturilor), @react-google-maps/api nu updateaza odata cu propul
   useEffect(() => {
     setFilteredListings(getFilteredListings(initialFilterData, data, minPrice, maxPrice, minBaths, minBeds, sendText, listSorting))
   }, [initialFilterData, data, minPrice, maxPrice, minBaths, minBeds, sendText, listSorting])
@@ -114,9 +119,11 @@ export default function Home({ data, initialFilterData }) {
 
   return (
     <div className={styles.layoutContainer + ' ' + fontOS.className}>
-      {showModal ? <HouseListingModal onClose={() => {
-        setShowModal(false);
-      }} listingData={selectedListing} /> : ''}
+      { showModal 
+      ? <HouseListingModal 
+        onClose={() => { setShowModal(false); }} 
+        listingData={selectedListing} /> 
+      : ''}
       <div className={styles.headerContainer + ' ' + fontBSD.className}>
         <div>!Zillow</div>
       </div>
@@ -205,7 +212,7 @@ export default function Home({ data, initialFilterData }) {
         <div className={styles.listContainer}>
           <div className={styles.listHeader}>
             <div className={styles.resultCount}>
-              {formatCount(filteredListings.length)} results
+              {formatCount(filteredListings.length, '.')} results
             </div>
             <div className={styles.sortControl}>
               <Dropdown align="end" onSelect={(eventKey, e) => { setListSorting(eventKey) }}>
@@ -224,18 +231,18 @@ export default function Home({ data, initialFilterData }) {
           <ul className={styles.listWrapper}>
             {
               filteredListings.map((listing, index) => {
-                return <li key={listing.id} onClick={
-                  () => {
-                    setSelectedListing(filteredListings[index]);
-                    setShowModal(true);
-                  }
-                }>
-                  <HouseListingCard
-                    listingData={listing}
-                  />
-                </li>
+                return ( 
+                  <li 
+                    key={listing.id} 
+                    onClick={
+                      () => {
+                        setSelectedListing(filteredListings[index]);
+                        setShowModal(true);
+                      }}>
+                    <HouseListingCard listingData={listing} />
+                  </li>
+                );
               })}
-
           </ul>
         </div>
       </div>

@@ -2,9 +2,6 @@ import Image from 'next/image'
 
 import styles from '../styles/components/HouseListingCard.module.scss'
 
-import { formatPrice } from '../src/helperFunctions'
-// TODO check responsiveness
-// TODO make mobile ready
 export default function HouseListingCard(props) {
 
   return (
@@ -30,12 +27,18 @@ export default function HouseListingCard(props) {
         <div className={styles.specsWrapper}>
           <div><strong>{props.listingData.beds}</strong> bds </div>
           <div>&nbsp;<strong>{props.listingData.baths}</strong> ba </div>
-          <div>&nbsp;<strong>{props.listingData.surfaceArea}</strong> sqft </div>
+          { props.listingData.surfaceArea != '' 
+          ? <div>&nbsp;<strong>{props.listingData.surfaceArea}</strong> sqft </div> 
+          : ''}
         </div>
       </div>
       <div className={styles.addressContainer}>
         {
-          [props.listingData.location.street, props.listingData.location.city, (props.listingData.location.state + '').toUpperCase() + ' ' + props.listingData.location.zip].map((field, index) => {
+          [
+            props.listingData.location.street, 
+            props.listingData.location.city, 
+            (props.listingData.location.state + '').toUpperCase() + ' ' + props.listingData.location.zip
+          ].map((field, index) => {
             if (field != '' && field != ' ')
               return <div key={index}>{field}</div>
             return '';

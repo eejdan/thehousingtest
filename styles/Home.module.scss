@@ -8,19 +8,23 @@ $filtersHeight: 80px;
 /* TODO clean rules (post map div changes) */
 
 .layoutContainer {
-  @include mixins.flex(c, nw, fs, fs);
   width: 100%;
+
+  @include mixins.flex(c, nw, fs, fs);
+
   text-rendering: optimizeLegibility;
 }
 .headerContainer {
-  @include mixins.flex(r, nw, c, c);
   width: 100%;
+
+  @include mixins.flex(r, nw, c, c);
   height: $headerHeight;
+  
   font-size: 54px;
   font-variant-caps: small-caps;
   color: colors.$primaryColor;
+  
   background-color: #fff;
-
   border-bottom: 2px solid colors.$primaryColor;
   box-shadow: 0px 6px 8px -4px rgba(0, 0, 0, 0.32);
 
@@ -29,22 +33,25 @@ $filtersHeight: 80px;
 }
 
 .appContainer {
-  @include mixins.flex(r, nw, space-between, fs);
   width: 100%;
+  
+  @include mixins.flex(r, nw, space-between, fs);
 }
 .mapContainer {
-  @include mixins.flex(c, nw, fs, c);
   height: calc(100vh - $headerHeight - $filtersHeight);
   width: calc(100vw - 760px);
+  
   padding: 10px;
-
+  
+  @include mixins.flex(c, nw, fs, c);
+  
   background-color: white;
 }
 .filtersWrapper {
-  @include mixins.flex(r, nw, fs, fe);
-
   height: $filtersHeight;
   width: 100%;
+  
+  @include mixins.flex(r, nw, fs, fe);
   gap: 30px;
 
   padding: 10px;
@@ -55,15 +62,18 @@ $filtersHeight: 80px;
   z-index: 99;
 }
 .mapWrapper {
-  margin-top: 5px;
   width: 100%;
   height: 100%;
+
+  margin-top: 5px;
 }
 .listContainer {
   width: 750px;
   height: calc(100vh - $headerHeight - $filtersHeight);
-  @include mixins.flex(c, nw, fs, fs);
+  
   overflow-y: auto;
+  
+  @include mixins.flex(c, nw, fs, fs);
 }
 .listHeader {
   width: 100%;
@@ -89,18 +99,23 @@ $filtersHeight: 80px;
 
   height: 100%;
   width: 100%;
-  margin-bottom: 0;
+  
   display: grid;
-  gap: 15px;
   grid-template-columns: repeat(auto-fill, minmax(286px, 1fr));
+  gap: 15px;
 
+  margin-bottom: 0;
+  
   list-style: none;
   padding: 8px 16px;
 
   & > li {
-    display: list-item;
-    height: 281px;
     position: relative;
+
+    height: 281px;
+    
+    display: list-item;
+    
     padding: 0;
   }
   & > li:last-child {

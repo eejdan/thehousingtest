@@ -2,12 +2,13 @@ import Image from 'next/image'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons'
-
 import { Big_Shoulders_Stencil_Display } from 'next/font/google'
 
 import ModalContainer from './base/ModalContainer'
-import { formatCount } from '../src/helperFunctions'
+
 import styles from '../styles/components/HouseListingModal.module.scss'
+
+import { formatCount } from '../src/helperFunctions'
 
 const fontBSD = Big_Shoulders_Stencil_Display({
     subsets: ['latin'], weight: ['800']
@@ -44,7 +45,11 @@ export default function HouseListingModal(props) {
                         <div>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(parseInt(props.listingData.price))}</div>
                         <div className={styles.addressContainer}>
                             {
-                                [props.listingData.location.street, props.listingData.location.city, (props.listingData.location.state + '').toUpperCase() + ' ' + props.listingData.location.zip].map((field, index) => {
+                                [
+                                    props.listingData.location.street,
+                                    props.listingData.location.city,
+                                    (props.listingData.location.state + '').toUpperCase() + ' ' + props.listingData.location.zip
+                                ].map((field, index) => {
                                     if (field != '' && field != ' ')
                                         return <div key={index}>{field}</div>
                                     return '';
@@ -59,7 +64,6 @@ export default function HouseListingModal(props) {
                         <div>sqft</div>
                     </div>
                 </div>
-                <div className={styles.action}></div>
             </div>
         </ModalContainer>
     )

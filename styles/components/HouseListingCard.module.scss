@@ -47,13 +47,16 @@
 .imageWrapper {
     grid-area: image;
 
-    @include mixins.flex(r, nw, c, c);
     height: 177px;
     overflow: hidden;
+    
+    @include mixins.flex(r, nw, c, c);
+
     padding-left: 0 !important;
 }
 .priceContainer {
     grid-area: price;
+
     font-weight: bold;
     font-size: 20px;
 }
