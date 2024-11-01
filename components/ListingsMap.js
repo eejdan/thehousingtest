@@ -19,7 +19,6 @@ function ListingsMap(props) {
   const onUnmount = useCallback(function callback(map) {
     setMap(null)
   }, [])
-  console.log(props.markers);
   return isLoaded ? (
     <GoogleMap
       mapContainerStyle={containerStyle}
