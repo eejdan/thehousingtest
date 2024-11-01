@@ -38,11 +38,21 @@
     
     font-size: 12px;
     font-weight: 700;
+        
     color: #ffffff;
 
     border-radius: 100px;
     background-color: rgba(0, 0, 0, 0.6);
 
+}
+.statusActive {
+    background-color: rgba(3, 65, 233, 0.733);
+}
+.statusPending {
+    background-color: rgba(182, 194, 10, 0.733);
+}
+.statusAUC {
+    background-color: rgb(14, 108, 163);
 }
 .imageWrapper {
     grid-area: image;

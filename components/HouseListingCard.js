@@ -6,7 +6,11 @@ export default function HouseListingCard(props) {
 
   return (
     <div className={styles.card}>
-      <div className={styles.statusRibbon}>
+      <div className={styles.statusRibbon + ' ' +
+        (props.listingData.status == 'Active'                ? styles.statusActive : ''
+      ||props.listingData.status == 'Pending'               ? styles.statusPending : ''
+      ||props.listingData.status == 'Active Under Contract' ? styles.statusAUC : '' )
+      }>
         {props.listingData.status}
       </div>
       <div className={styles.imageWrapper}>
@@ -21,7 +25,7 @@ export default function HouseListingCard(props) {
           loading='lazy' />
       </div>
       <div className={styles.priceContainer}>
-        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(parseInt(props.listingData.price))}
+        { new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(parseInt(props.listingData.price))}
       </div>
       <div className={styles.specsContainer}>
         <div className={styles.specsWrapper}>
