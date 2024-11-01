@@ -3,7 +3,7 @@
 const path = require('path');
 require('dotenv').config()
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   swcMinify: true,
   sassOptions: {
     includePaths: [path.join(__dirname, 'styles')],

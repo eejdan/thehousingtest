@@ -115,7 +115,10 @@ export default function Home({ data, initialFilterData }) {
     }, 1000)
   }, [textField])
 
-  useEffect
+  const handleMarkerClick = (index) => {
+    setSelectedListing(filteredListings[index]);
+    setShowModal(true);
+  }
 
   return (
     <div className={styles.layoutContainer + ' ' + fontOS.className}>
@@ -201,7 +204,7 @@ export default function Home({ data, initialFilterData }) {
                     }}
                     key={listing.id}
                     onClick={() => {
-                      handleClick(index);
+                      handleMarkerClick(index);
                     }}
                     clusterer={clusterer}
                   />)}
