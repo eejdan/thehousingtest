@@ -21,6 +21,8 @@
     box-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px 0px;
     border-radius: 7px;
 
+    transition: box-shadow .2s;
+
     &:hover {
         box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 8px 0px;
     }
